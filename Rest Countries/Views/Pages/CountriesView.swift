@@ -9,52 +9,103 @@ import SwiftUI
 
 struct CountriesView: View {
     @State var countries: [Country] = []
+    @State var searchText: String = ""
+    @State var selectedRegion: String = "All"
     let columns = [GridItem(.flexible())]
+    @State var filtredCountries: [Country] = []
 
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 24) {
-                ForEach(
-                    countries.sorted { $0.name.common < $1.name.common },
-                    id: \.cca2
-                ) { country in
+            VStack {
+                HStack(spacing: 32) {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(Color(.systemGray4))
+                        TextField("Search", text: $searchText)
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(style: StrokeStyle(lineWidth: 1))
+                            .foregroundStyle(Color(.systemGray4))
+                    }
 
-                    NavigationLink(value: country.cca2) {
-                        VStack(alignment: .center) {
-                            AsyncImage(url: URL(string: country.flags.png)!)
-                                .frame(
-                                    width: 280,
-                                    height: 160,
-                                    alignment: .center
-                                )
-                                .padding(24)
-                            Text(country.name.common)
-                                .font(.headline)
-                                .foregroundStyle(.black)
-                                .fontWeight(.semibold)
-                                .padding()
-                            VStack(spacing: 12) {
-                                Group {
-                                    LabelValueTextView(label: "Population", value: String(country.population))
-                                    HStack {
-                                        LabelValueTextView(label: "Region", value: country.region)
-                                        LabelValueTextView(label: "Capital", value: country.capital.joined(separator: ", "))
-                                    }
-                                }
-
-                            }
-                        }
-                    }.frame(width: 280, height: 320)
-                        .padding()
-                        .background(Color.white)
-                        .cornerRadius(10)
-                        .shadow(color: .gray, radius: 5, x: 0, y: 5)
+                    Picker("Countries", selection: $selectedRegion) {
+                        Text("All").tag("All")
+                        Text("Europe").tag("Europe")
+                        Text("Asia").tag("Asia")
+                        Text("Africa").tag("Africa")
+                        Text("North America").tag("North America")
+                        Text("South America").tag("South America")
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(style: StrokeStyle(lineWidth: 1))
+                            .foregroundStyle(Color(.systemGray4))
+                    }
 
                 }
-            }
-            .padding(24)
-            .navigationDestination(for: String.self) { code in
-                CountryView(code: code)
+                .padding()
+                LazyVGrid(columns: columns, spacing: 24) {
+                    ForEach(
+                        countries.sorted { $0.name.common < $1.name.common },
+                        id: \.cca2
+                    ) { country in
+
+                        NavigationLink(value: country.cca2) {
+                            VStack(alignment: .center) {
+                                AsyncImage(url: URL(string: country.flags.png))
+                                { image in
+                                    image
+                                        .frame(width: 80, height: 80)
+                                        .padding(.bottom, 32)
+
+                                } placeholder: {
+                                    ProgressView()
+                                }.padding(.bottom, 32)
+                                
+                                Text(country.name.common)
+                                    .font(.headline)
+                                    .foregroundStyle(.black)
+                                    .fontWeight(.semibold)
+                                    .padding()
+                                VStack(spacing: 12) {
+                                    Group {
+                                        LabelValueTextView(
+                                            label: "Population",
+                                            value: String(country.population)
+                                        )
+                                        HStack {
+                                            LabelValueTextView(
+                                                label: "Region",
+                                                value: country.region
+                                            )
+                                            LabelValueTextView(
+                                                label: "Capital",
+                                                value: country.capital.joined(
+                                                    separator: ", "
+                                                )
+                                            )
+                                        }
+                                    }
+
+                                }
+                            }
+                        }.frame(width: 280, height: 320)
+                            .padding()
+                            .background(Color.white)
+                            .cornerRadius(10)
+                            .shadow(color: .gray, radius: 5, x: 0, y: 5)
+
+                    }
+                }
+                .padding(24)
+                .navigationDestination(for: String.self) { code in
+                    CountryView(code: code)
+                }
             }
         }.navigationTitle(Text("Rest Countries"))
             .task {
