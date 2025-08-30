@@ -12,7 +12,19 @@ struct CountriesView: View {
     @State var searchText: String = ""
     @State var selectedRegion: String = "All"
     let columns = [GridItem(.flexible())]
-    @State var filtredCountries: [Country] = []
+    var filteredCountries: [Country] {
+        guard !searchText.isEmpty || selectedRegion != "All" else { return countries }
+        
+        let filteredByRegion: [Country] = selectedRegion == "All" ? countries : countries.filter { $0.region.lowercased() == selectedRegion.lowercased() }
+        
+        
+        guard !searchText.isEmpty else { return filteredByRegion }
+        
+        return filteredByRegion.filter {
+            $0.name.common.lowercased().starts(with: searchText.lowercased())
+        }
+        
+    }
 
     var body: some View {
         ScrollView {
@@ -23,8 +35,9 @@ struct CountriesView: View {
                             .foregroundStyle(Color(.systemGray4))
                         TextField("Search", text: $searchText)
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .frame(width: 200, height: 32)
                     .overlay {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(style: StrokeStyle(lineWidth: 1))
@@ -36,11 +49,11 @@ struct CountriesView: View {
                         Text("Europe").tag("Europe")
                         Text("Asia").tag("Asia")
                         Text("Africa").tag("Africa")
-                        Text("North America").tag("North America")
-                        Text("South America").tag("South America")
+                        Text("Americas").tag("Americas")
+
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+                    .frame(width: 100, height: 32)
+                    .tint(.black)
                     .overlay {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(style: StrokeStyle(lineWidth: 1))
@@ -51,7 +64,7 @@ struct CountriesView: View {
                 .padding()
                 LazyVGrid(columns: columns, spacing: 24) {
                     ForEach(
-                        countries.sorted { $0.name.common < $1.name.common },
+                        filteredCountries.sorted { $0.name.common < $1.name.common },
                         id: \.cca2
                     ) { country in
 
@@ -133,6 +146,7 @@ struct CountriesView: View {
         guard let url = URL(string: url) else { throw HTTPError.invalidURL }
 
         let (data, response) = try await URLSession.shared.data(from: url)
+        
 
         guard let httpResponse = response as? HTTPURLResponse,
             200..<300 ~= httpResponse.statusCode
@@ -142,7 +156,10 @@ struct CountriesView: View {
 
         do {
             let decoder = JSONDecoder()
-            return try decoder.decode([Country].self, from: data)
+            let countries: [Country] = try decoder.decode([Country].self, from: data)
+            
+            return countries
+            
 
         } catch HTTPError.clientError {
             print("Client Error")

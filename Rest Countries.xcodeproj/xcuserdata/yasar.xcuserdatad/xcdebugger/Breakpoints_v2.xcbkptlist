@@ -16,7 +16,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "15"
             endingLineNumber = "15"
-            landmarkName = "body"
+            landmarkName = "filteredCountries"
             landmarkType = "24">
             <Locations>
                <Location
@@ -60,10 +60,10 @@
             filePath = "Rest Countries/Views/Pages/CountriesView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "16"
-            endingLineNumber = "16"
-            landmarkName = "body"
-            landmarkType = "24">
+            startingLineNumber = "28"
+            endingLineNumber = "28"
+            landmarkName = "CountriesView"
+            landmarkType = "14">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
