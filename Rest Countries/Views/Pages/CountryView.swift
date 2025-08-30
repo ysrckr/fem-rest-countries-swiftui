@@ -11,35 +11,101 @@ struct CountryView: View {
     let code: String
     @State var country: Country? = nil
     var body: some View {
-        VStack {
-            
+        VStack(alignment: .leading) {
+
             if let country {
-                VStack(spacing: 24) {
+                VStack(alignment: .leading, spacing: 12) {
                     AsyncImage(url: URL(string: country.flags.png)) { image in
                         image
                             .resizable()
-                            .scaledToFit()
-                            .frame(width: 160, height: 80)
-                            
+                            .frame(width: 320, height: 200)
 
                     } placeholder: {
                         ProgressView()
                     }
-                    
-                    VStack {
+
+                    VStack(alignment: .leading, spacing: 8) {
                         Text(country.name.common)
-                            .font(.headline)
+                            .font(.title)
                             .foregroundColor(.black)
                             .fontWeight(.bold)
-                            
-                        LabelValueTextView(label: "Capital", value: "\(country.capital.joined(separator: ", "))")
-                        Text("Population: \(country.population)")
+                            .padding(.bottom, 8)
+
+                        LabelValueTextView(
+                            label: "Population",
+                            value: "\(country.population)"
+                        )
+
+                        LabelValueTextView(
+                            label: "Capital",
+                            value: "\(country.capital.joined(separator: ", "))"
+                        )
+
+                        LabelValueTextView(
+                            label: "Region",
+                            value: "\(country.region)"
+                        )
+                        .padding(.bottom, 16)
+
+                        LabelValueTextView(
+                            label: "Population",
+                            value: "\(country.population)"
+                        )
+
+                        LabelValueTextView(
+                            label: "Capital",
+                            value: "\(country.capital.joined(separator: ", "))"
+                        )
+
+                        LabelValueTextView(
+                            label: "Region",
+                            value: "\(country.region)"
+                        )
+
+                        VStack(alignment: .leading) {
+                            Text("Border Countries")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.black)
+                                .padding(.bottom, 8)
+
+                            NavigationLink(value: country.cca2) {
+                                Text("\(country.name.common)")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .foregroundStyle(.black)
+                                    .padding()
+
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(
+                                                style: StrokeStyle(lineWidth: 1)
+                                            )
+                                            .shadow(
+                                                color: .black.opacity(0.3),
+                                                radius: 5,
+                                                x: 5,
+                                                y: 5
+                                            )
+                                            .foregroundStyle(
+                                                Color(.systemGray4)
+                                            )
+
+                                    }
+
+                            }
+
+                        }
+                        .padding(.vertical, 32)
+
                     }
                 }
-            }  else {
+            } else {
                 ProgressView()
             }
-        }.task {
+        }
+        .frame(width: .infinity)
+        .task {
             do {
                 country = try await GetCountryByCode(code: code).first
             } catch {
@@ -48,35 +114,34 @@ struct CountryView: View {
         }
     }
 
-    
     enum HTTPError: Error {
         case invalidURL
         case clientError
         case serverError
     }
-    
+
     func GetCountryByCode(code: String) async throws -> [Country] {
         let url = "https://restcountries.com/v3.1/alpha/\(code)"
-        
+
         guard let url = URL(string: url) else { throw HTTPError.invalidURL }
-        
+
         let (data, response) = try await URLSession.shared.data(from: url)
-        
+
         guard let httpResponse = response as? HTTPURLResponse,
-              200..<300 ~= httpResponse.statusCode
+            200..<300 ~= httpResponse.statusCode
         else {
             throw HTTPError.serverError
         }
-        
+
         do {
             let decoder = JSONDecoder()
             let countries: [Country] = try decoder.decode(
                 [Country].self,
                 from: data
             )
-            
+
             return countries
-            
+
         } catch HTTPError.clientError {
             print("Client Error")
         } catch {
@@ -85,7 +150,6 @@ struct CountryView: View {
         return []
     }
 }
-
 
 #Preview {
     CountryView(code: "TR")
