@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct CountriesView: View {
+    @Environment(\.colorScheme) var colorScheme
     @State var countries: [Country] = []
     @State var searchText: String = ""
     @State var selectedRegion: String = "All"
@@ -32,7 +33,7 @@ struct CountriesView: View {
                 HStack(spacing: 32) {
                     HStack {
                         Image(systemName: "magnifyingglass")
-                            .foregroundStyle(Color(.systemGray4))
+                            .foregroundStyle(colorScheme == .dark ? .white : Color(.systemGray4))
                         TextField("Search", text: $searchText)
                     }
                     .padding(.horizontal, 12)
@@ -41,7 +42,7 @@ struct CountriesView: View {
                     .overlay {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(style: StrokeStyle(lineWidth: 1))
-                            .foregroundStyle(Color(.systemGray4))
+                            .foregroundStyle(Color(colorScheme == .dark ? .white : .systemGray4))
                     }
 
                     Picker("Countries", selection: $selectedRegion) {
@@ -53,11 +54,11 @@ struct CountriesView: View {
 
                     }
                     .frame(width: 100, height: 32)
-                    .tint(.black)
+                    .tint(colorScheme == .dark ? .white : .black)
                     .overlay {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(style: StrokeStyle(lineWidth: 1))
-                            .foregroundStyle(Color(.systemGray4))
+                            .foregroundStyle(Color(colorScheme == .dark ? .white : .systemGray4))
                     }
 
                 }
@@ -82,7 +83,7 @@ struct CountriesView: View {
                                 
                                 Text(country.name.common)
                                     .font(.headline)
-                                    .foregroundStyle(.black)
+                                    .foregroundStyle(.primary)
                                     .fontWeight(.semibold)
                                     .padding()
                                 VStack(spacing: 12) {
@@ -109,9 +110,14 @@ struct CountriesView: View {
                             }
                         }.frame(width: 280, height: 320)
                             .padding()
-                            .background(Color.white)
+                            .background(colorScheme == .dark ? .black : .white)
                             .cornerRadius(10)
-                            .shadow(color: .gray, radius: 5, x: 0, y: 5)
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(style: StrokeStyle(lineWidth: 1))
+                                    .foregroundStyle(Color(colorScheme == .dark ? .white : .systemGray4))
+                            }
+
 
                     }
                 }
@@ -138,7 +144,7 @@ struct CountriesView: View {
 
     func getCountries(
         fields: [String] = [
-            "name", "flags", "population", "cca2", "region", "capital",
+            "name", "flags", "population", "cca2", "region", "capital", "borders"
         ]
     ) async throws -> [Country] {
         let url =

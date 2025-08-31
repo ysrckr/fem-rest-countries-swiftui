@@ -25,4 +25,5 @@ struct Country: Codable {
     var cca2: String
     var region: String
     var capital: [String]
+    let borders: [String]
 }

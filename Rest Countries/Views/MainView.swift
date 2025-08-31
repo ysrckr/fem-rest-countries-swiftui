@@ -8,11 +8,14 @@
 import SwiftUI
 
 struct MainView: View {
+    @Environment(\.colorScheme) var colorScheme
     let code: String
     var body: some View {
         NavigationStack() {
             CountriesView()
+                
         }
+        .tint(colorScheme == .dark ? .white : .black)
     }
 }
 

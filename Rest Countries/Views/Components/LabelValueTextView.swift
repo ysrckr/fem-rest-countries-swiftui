@@ -15,13 +15,13 @@ struct LabelValueTextView: View {
         HStack(spacing: 4) {
             Text("\(label):")
                 .font(font)
-                .foregroundStyle(.black)
+                .foregroundStyle(.primary)
                 .fontWeight(.semibold)
             
             Text(value)
                 .font(font)
                 .fontWeight(.regular)
-                .foregroundStyle(.black)
+                .foregroundStyle(.primary)
         }
         
        

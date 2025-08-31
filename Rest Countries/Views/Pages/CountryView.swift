@@ -8,8 +8,16 @@
 import SwiftUI
 
 struct CountryView: View {
+    @Environment(\.colorScheme) var colorScheme
     let code: String
     @State var country: Country? = nil
+    let columns: [GridItem] = [
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+    ]
+
     var body: some View {
         VStack(alignment: .leading) {
 
@@ -27,7 +35,7 @@ struct CountryView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(country.name.common)
                             .font(.title)
-                            .foregroundColor(.black)
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
                             .fontWeight(.bold)
                             .padding(.bottom, 8)
 
@@ -61,50 +69,56 @@ struct CountryView: View {
                             label: "Region",
                             value: "\(country.region)"
                         )
+                        Text("Border Countries")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(colorScheme == .dark ? .white : .black)
+                            .padding(.vertical, 16)
+                        LazyVGrid(columns: columns) {
 
-                        VStack(alignment: .leading) {
-                            Text("Border Countries")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.black)
-                                .padding(.bottom, 8)
+                            ForEach(country.borders, id: \.self) { borderCode in
+                                NavigationLink(value: borderCode) {
+                                    Text("\(borderCode)")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundStyle(colorScheme == .dark ? .white : .black)
+                                        .padding()
 
-                            NavigationLink(value: country.cca2) {
-                                Text("\(country.name.common)")
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundStyle(.black)
-                                    .padding()
+                                        .overlay {
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(
+                                                    style: StrokeStyle(
+                                                        lineWidth: 1
+                                                    )
+                                                )
+                                                .shadow(
+                                                    color: .black.opacity(0.3),
+                                                    radius: 5,
+                                                    x: 5,
+                                                    y: 5
+                                                )
+                                                .foregroundStyle(
+                                                    Color(.systemGray4)
+                                                )
 
-                                    .overlay {
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(
-                                                style: StrokeStyle(lineWidth: 1)
-                                            )
-                                            .shadow(
-                                                color: .black.opacity(0.3),
-                                                radius: 5,
-                                                x: 5,
-                                                y: 5
-                                            )
-                                            .foregroundStyle(
-                                                Color(.systemGray4)
-                                            )
+                                        }
 
-                                    }
-
+                                }
                             }
 
+                        }.navigationDestination(for: String.self) {
+                            borderCode in
+                            CountryView(code: borderCode)
                         }
-                        .padding(.vertical, 32)
-
                     }
+                    Spacer()
                 }
             } else {
                 ProgressView()
             }
         }
         .frame(width: .infinity)
+        .padding()
         .task {
             do {
                 country = try await GetCountryByCode(code: code).first
